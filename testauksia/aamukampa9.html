@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arin aamukampa</title>
+  <style>
+    :root {
+      --bg1: #f7f4ef;
+      --bg2: #ebe2d4;
+      --card: rgba(255,255,255,0.88);
+      --card-solid: #ffffff;
+      --text: #2e2a26;
+      --muted: #6e685f;
+      --accent: #8a6d4b;
+      --accent-soft: #e9dfd2;
+      --border: #ddd3c7;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --line: rgba(47,42,36,.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--card);
+      backdrop-filter: blur(7px);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: 0 12px 36px var(--shadow);
+    }
+
+    .today {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      font-size: 0.92rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .sub {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 900px;
+    }
+
+    .mindRow {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      margin-bottom: 22px;
+      align-items: start;
+    }
+
+    .dailyBox,
+    .zenBox,
+    .lifeBox {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--border);
+    }
+
+    .boxTitle {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .dailyBox {
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dailyShotStage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .dailyImageWrap {
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.5);
+      min-height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dailyImageWrap img {
+      width: 100%;
+      height: 100%;
+      max-height: 620px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .dailyPlaceholder {
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      padding: 28px;
+      line-height: 1.55;
+    }
+
+    .dailyMeta {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .dailyActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .buttonLike {
+      appearance: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border: 1px solid transparent;
+      font-weight: 600;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .buttonLike:hover {
+      transform: translateY(-1px);
+      opacity: 0.94;
+    }
+
+    .dailyHint {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .statusLine {
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    .statusLine.ok {
+      color: #49684f;
+    }
+
+    .statusLine.warn {
+      color: #9a5c3c;
+    }
+
+    .dailyQuoteBox {
+      margin-top: 6px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.58);
+      border: 1px solid var(--line);
+    }
+
+    .dailyQuoteText {
+      font-size: 1rem;
+      line-height: 1.55;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .sideStack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .zenWord {
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .zenSub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .lifeGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .miniCard {
+      background: var(--card-solid);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .miniLabel {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
+    .miniValue {
+      font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.05em;
+    }
+
+    .careerGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .duration {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255,255,255,0.66);
+    }
+
+    .section h2 {
+      margin: 0 0 4px;
+      font-size: 1.2rem;
+    }
+
+    .section-date {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card-solid);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .label {
+      font-size: 0.96rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .value {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: var(--accent);
+    }
+
+    .small {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .footer {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .formula {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px dashed var(--border);
+      background: #faf7f2;
+    }
+
+    @media (max-width: 980px) {
+      .mindRow,
+      .sections {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .lifeGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .panel {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .section {
+        padding: 15px;
+      }
+
+      .dailyBox {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="today" id="todayText">Tänään:</div>
+
+      <h1>Arin aamukampa</h1>
+      <p class="sub">
+        Päiviä kohti eläkeaikaa ja tavoite-eläkettä. Mukana myös arvio
+        <strong>todellisista työssäolopäivistä</strong>:
+        arkipäivät − arkipyhät − 50 vapaajakson arkipäivää.
+      </p>
+
+      <div class="mindRow">
+        <div class="dailyBox">
+          <div class="boxTitle">Päivän kuva</div>
+
+          <div class="dailyShotStage">
+            <div class="dailyImageWrap" id="dailyImageWrap">
+              <div class="dailyPlaceholder">Ladataan tämän päivän kuvaa…</div>
+            </div>
+
+            <div class="dailyMeta" id="dailyMeta"></div>
+
+            <div class="dailyActions">
+              <label for="dailyShotInput" class="buttonLike">Ota päivän kuva</label>
+              <input id="dailyShotInput" type="file" accept="image/*" capture="environment" hidden />
+            </div>
+
+            <div class="dailyHint">
+              Tähän näkyy tämän päivän viimeisin tallennettu kuva.
+            </div>
+
+            <div class="statusLine" id="dailyStatus"></div>
+
+            <div class="dailyQuoteBox">
+              <div class="boxTitle">Päivän viisaus</div>
+              <div class="dailyQuoteText" id="dailyQuote">–</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sideStack">
+          <div class="zenBox">
+            <div class="boxTitle">Päivän sana</div>
+            <div class="zenWord" id="zenWord">–</div>
+            <div class="zenSub">Pieni suunta tälle päivälle.</div>
+          </div>
+
+          <div class="lifeBox">
+            <div class="boxTitle">Eksistentiaalinen näkymä</div>
+
+            <div class="lifeGrid">
+              <div class="miniCard">
+                <div class="miniLabel">Olet elänyt</div>
+                <div class="miniValue" id="daysLived">–</div>
+              </div>
+              <div class="miniCard">
+                <div class="miniLabel">Elämäsi päivä numero</div>
+                <div class="miniValue" id="lifeDayNumber">–</div>
+              </div>
+            </div>
+
+            <div class="careerGrid">
+              <div class="miniCard">
+                <div class="miniLabel">Olet toiminut ammatillisessa koulutuksessa</div>
+                <div class="miniValue" id="vocationalDays">–</div>
+                <div class="duration" id="vocationalDuration">–</div>
+                <div class="small">alkaen 1.8.2004</div>
+              </div>
+
+              <div class="miniCard">
+                <div class="miniLabel">Olet toiminut yhtäjaksoisesti yrittäjänä</div>
+                <div class="miniValue" id="entrepreneurDays">–</div>
+                <div class="duration" id="entrepreneurDuration">–</div>
+                <div class="small">alkaen 15.2.1999</div>
+              </div>
+
+              <div class="miniCard">
+                <div class="miniLabel">Olet toiminut valokuvauksen kontekstissa</div>
+                <div class="miniValue" id="photographyDays">–</div>
+                <div class="duration" id="photographyDuration">–</div>
+                <div class="small">alkaen 1.8.1977</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sections">
+        <section class="section">
+          <h2>Eläkkeelle mahdollinen jäänti</h2>
+          <p class="section-date">1.4.2027</p>
+
+          <div class="grid">
+            <div class="card">
+              <div class="label">Kaikki päivät</div>
+              <div class="value" id="allDaysRetirement">–</div>
+              <div class="small">Kalenteripäivät tästä päivästä kohdepäivään</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Arkipäivät</div>
+              <div class="value" id="weekdaysRetirement">–</div>
+              <div class="small">Vain maanantai–perjantai</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Todelliset työssäolopäivät</div>
+              <div class="value" id="actualWorkdaysRetirement">–</div>
+              <div class="small">
+                Arkipäivät − arkipyhät − 50 vapaajakson arkipäivää
+                <br>
+                <span id="breakdownRetirement">–</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Tavoite-eläke</h2>
+          <p class="section-date">1.8.2028</p>
+
+          <div class="grid">
+            <div class="card">
+              <div class="label">Kaikki päivät</div>
+              <div class="value" id="allDaysGoal">–</div>
+              <div class="small">Kalenteripäivät tästä päivästä kohdepäivään</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Arkipäivät</div>
+              <div class="value" id="weekdaysGoal">–</div>
+              <div class="small">Vain maanantai–perjantai</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Todelliset työssäolopäivät</div>
+              <div class="value" id="actualWorkdaysGoal">–</div>
+              <div class="small">
+                Arkipäivät − arkipyhät − 50 vapaajakson arkipäivää
+                <br>
+                <span id="breakdownGoal">–</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">
+        <div><strong>Huom:</strong> arkipyhissä huomioidaan suomalaiset viralliset pyhäpäivät, jotka osuvat arkipäiville laskenta-ajalla.</div>
+        <div>Juhannusaatto ja jouluaatto eivät ole tässä mukana arkipyhinä.</div>
+        <div class="formula">
+          Todelliset työssäolopäivät = arkipäivät − arkipyhät − 50
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as exifr from "https://cdn.jsdelivr.net/npm/exifr/dist/lite.esm.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp,
+      query,
+      where,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
+      authDomain: "photodiarygame.firebaseapp.com",
+      projectId: "photodiarygame",
+      storageBucket: "photodiarygame.firebasestorage.app",
+      messagingSenderId: "745003978989",
+      appId: "1:745003978989:web:727489ba72b34d77af3ce4",
+      measurementId: "G-1T7CBFRP55"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const VACATION_WORKDAYS = 50;
+    const birthDate = new Date(1962, 2, 25); // 25.3.1962
+
+    const vocationalStartDate = new Date(2004, 7, 1);    // 1.8.2004
+    const entrepreneurStartDate = new Date(1999, 1, 15); // 15.2.1999
+    const photographyStartDate = new Date(1977, 7, 1);   // 1.8.1977
+
+    const quotes = [
+      "Oivalla syvästi: tämä hetki on kaikki, mitä sinulla koskaan on.",
+      "Nykyhetki on ainoa aika, johon voit vaikuttaa.",
+      "Elämä on nyt.",
+      "Missä oletkin, ole siellä kokonaan.",
+      "Et ole ajatuksesi.",
+      "Onnettomuuden syy ei ole tilanne, vaan ajatuksesi siitä.",
+      "Hyväksy — ja toimi.",
+      "Tietoinen läsnäolo on suurin muutoksen voima.",
+      "Tämäkin kuuluu tähän hetkeen.",
+      "Hyväksy tämä hetki kuin olisit itse valinnut sen.",
+      "Mikään ei koskaan tapahtunut menneisyydessä — kaikki tapahtui tässä hetkessä.",
+      "Mikään ei tapahdu tulevaisuudessa — kaikki tapahtuu tässä hetkessä.",
+      "Hiljaisuudessa syntyvät oivallukset.",
+      "Kun samaistut mieleesi, jäät aikaan vangiksi.",
+      "Kun menetät yhteyden sisäiseen hiljaisuuteen, menetät yhteyden itseesi.",
+      "Rauha löytyy tästä hetkestä, ei sen ulkopuolelta.",
+      "Älä etsi itseäsi ajattelusta — löydät itsesi läsnäolosta.",
+      "Tämä hetki riittää.",
+      "Mieli vie pois, läsnäolo tuo takaisin.",
+      "Ole tietoinen siitä, mitä on — ilman vastustusta.",
+      "Hengitys tuo sinut takaisin tähän.",
+      "Kun hyväksyt tämän hetken, vastustus päättyy.",
+      "Tässä hetkessä ei ole ongelmaa — vain tilanne.",
+      "Anna tämän hetken olla sellainen kuin se on.",
+      "Läsnäolo alkaa, kun lakkaat pakenemasta tätä hetkeä.",
+      "Hiljaisuus ei ole tyhjyyttä — se on läsnäoloa.",
+      "Ajatus ei ole sinä.",
+      "Tarkkaile mieltäsi — älä usko kaikkea mitä se sanoo.",
+      "Kun olet läsnä, aika menettää otteensa.",
+      "Todellinen voima on tässä hetkessä.",
+      "Anna ajatusten tulla ja mennä — sinä olet se, joka huomaa ne.",
+      "Et tarvitse tulevaisuutta ollaksesi kokonainen.",
+      "Ole tässä, juuri nyt — siinä on kaikki.",
+      "Kaikki, mitä koet, tapahtuu nyt.",
+      "Lepää tässä hetkessä.",
+      "Älä kiirehdi pois tästä hetkestä.",
+      "Tämä hetki on portti rauhaan.",
+      "Läsnäolo on yksinkertaista — mieli tekee siitä vaikeaa.",
+      "Kun lakkaat taistelemasta tätä hetkeä vastaan, rauha ilmestyy.",
+      "Ole se, joka huomaa — ei se, joka reagoi.",
+      "Sinun ei tarvitse lisätä tähän hetkeen mitään.",
+      "Tämä hetki on jo riittävä.",
+      "Huomaa, että olet tietoinen — siinä on kaikki.",
+      "Ole tässä ennen kuin ajattelet.",
+      "Kaikki alkaa tästä hetkestä."
+    ];
+
+    const zenWords = [
+      "hengitys",
+      "rauha",
+      "hiljaisuus",
+      "valo",
+      "nyt",
+      "virtaus",
+      "tila",
+      "läsnäolo",
+      "lempeys",
+      "selkeys",
+      "levollisuus",
+      "havahtuminen",
+      "kuuntelu",
+      "yksinkertaisuus",
+      "kiitollisuus",
+      "avautuminen",
+      "tasapaino",
+      "katse",
+      "odottamattomuus",
+      "hyväksyntä"
+    ];
+
+    function uid() {
+      return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+    }
+
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function getTodayKey() {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, "0");
+      const d = String(today.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function isWeekday(date) {
+      const day = date.getDay();
+      return day >= 1 && day <= 5;
+    }
+
+    function daysBetween(fromDate, toDate) {
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const from = startOfDay(fromDate);
+      const to = startOfDay(toDate);
+      return Math.max(0, Math.round((to - from) / msPerDay));
+    }
+
+    function daysSince(startDate, endDate = new Date()) {
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const start = startOfDay(startDate);
+      const end = startOfDay(endDate);
+      return Math.max(0, Math.floor((end - start) / msPerDay));
+    }
+
+    function formatFinnishDate(date) {
+      return date.toLocaleDateString("fi-FI", {
+        weekday: "long",
+        day: "numeric",
+        month: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function formatDateTime(date) {
+      try {
+        return new Intl.DateTimeFormat("fi-FI", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        }).format(date);
+      } catch {
+        return "";
+      }
+    }
+
+    function countWeekdays(fromDate, toDate) {
+      const start = startOfDay(fromDate);
+      const end = startOfDay(toDate);
+      const current = new Date(start);
+      let count = 0;
+
+      while (current < end) {
+        if (isWeekday(current)) count++;
+        current.setDate(current.getDate() + 1);
+      }
+
+      return count;
+    }
+
+    function createDate(year, month, day) {
+      return new Date(year, month - 1, day);
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function getEasterSunday(year) {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31);
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month - 1, day);
+    }
+
+    function getMidsummerDay(year) {
+      for (let day = 20; day <= 26; day++) {
+        const d = createDate(year, 6, day);
+        if (d.getDay() === 6) return d;
+      }
+      return null;
+    }
+
+    function getAllSaintsDay(year) {
+      for (let offset = 0; offset <= 6; offset++) {
+        const d = new Date(year, 9, 31 + offset);
+        if (d.getDay() === 6) return d;
+      }
+      return null;
+    }
+
+    function getFinnishPublicHolidays(year) {
+      const easterSunday = getEasterSunday(year);
+
+      return [
+        createDate(year, 1, 1),
+        createDate(year, 1, 6),
+        addDays(easterSunday, -2),
+        easterSunday,
+        addDays(easterSunday, 1),
+        createDate(year, 5, 1),
+        addDays(easterSunday, 39),
+        addDays(easterSunday, 49),
+        getMidsummerDay(year),
+        getAllSaintsDay(year),
+        createDate(year, 12, 6),
+        createDate(year, 12, 25),
+        createDate(year, 12, 26)
+      ].filter(Boolean);
+    }
+
+    function countWeekdayHolidaysInRange(fromDate, toDate) {
+      const start = startOfDay(fromDate);
+      const end = startOfDay(toDate);
+      let count = 0;
+
+      for (let year = start.getFullYear(); year <= end.getFullYear(); year++) {
+        const holidays = getFinnishPublicHolidays(year);
+
+        for (const holiday of holidays) {
+          const h = startOfDay(holiday);
+          if (h >= start && h < end && isWeekday(h)) {
+            count++;
+          }
+        }
+      }
+
+      return count;
+    }
+
+    function calculateActualWorkdays(fromDate, toDate) {
+      const weekdays = countWeekdays(fromDate, toDate);
+      const weekdayHolidays = countWeekdayHolidaysInRange(fromDate, toDate);
+      const actual = Math.max(0, weekdays - weekdayHolidays - VACATION_WORKDAYS);
+
+      return {
+        weekdays,
+        weekdayHolidays,
+        vacationWorkdays: VACATION_WORKDAYS,
+        actual
+      };
+    }
+
+    function getDaySeed(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return y + m + d;
+    }
+
+    function seededIndex(seedString, arrayLength, salt = 0) {
+      let hash = 0;
+      const str = seedString + ":" + salt;
+
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+      }
+
+      return hash % arrayLength;
+    }
+
+    function showDailySelections() {
+      const today = new Date();
+      const seed = getDaySeed(today);
+
+      const quoteIndex = seededIndex(seed, quotes.length, 11);
+      const zenIndex = seededIndex(seed, zenWords.length, 29);
+
+      document.getElementById("zenWord").textContent = zenWords[zenIndex];
+      document.getElementById("dailyQuote").textContent = quotes[quoteIndex];
+    }
+
+    function diffYearsMonthsDays(startDate, endDate = new Date()) {
+      const start = startOfDay(startDate);
+      const end = startOfDay(endDate);
+
+      if (end < start) {
+        return { years: 0, months: 0, days: 0 };
+      }
+
+      let years = end.getFullYear() - start.getFullYear();
+      let months = end.getMonth() - start.getMonth();
+      let days = end.getDate() - start.getDate();
+
+      if (days < 0) {
+        months--;
+        const prevMonthLastDay = new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+        days += prevMonthLastDay;
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      return { years, months, days };
+    }
+
+    function formatDurationYMD(startDate, endDate = new Date()) {
+      const diff = diffYearsMonthsDays(startDate, endDate);
+      return `${diff.years} vuotta, ${diff.months} kuukautta, ${diff.days} päivää`;
+    }
+
+    function updateLifeCounters() {
+      const today = new Date();
+      const todayStart = startOfDay(today);
+      const born = startOfDay(birthDate);
+
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const livedDays = Math.floor((todayStart - born) / msPerDay);
+      const lifeDayNumber = livedDays + 1;
+
+      document.getElementById("daysLived").textContent = livedDays.toLocaleString("fi-FI");
+      document.getElementById("lifeDayNumber").textContent = lifeDayNumber.toLocaleString("fi-FI");
+
+      document.getElementById("vocationalDays").textContent =
+        daysSince(vocationalStartDate, today).toLocaleString("fi-FI");
+      document.getElementById("vocationalDuration").textContent =
+        formatDurationYMD(vocationalStartDate, today);
+
+      document.getElementById("entrepreneurDays").textContent =
+        daysSince(entrepreneurStartDate, today).toLocaleString("fi-FI");
+      document.getElementById("entrepreneurDuration").textContent =
+        formatDurationYMD(entrepreneurStartDate, today);
+
+      document.getElementById("photographyDays").textContent =
+        daysSince(photographyStartDate, today).toLocaleString("fi-FI");
+      document.getElementById("photographyDuration").textContent =
+        formatDurationYMD(photographyStartDate, today);
+    }
+
+    function updateCounters() {
+      const today = new Date();
+
+      const retirementDate = new Date(2027, 3, 1);
+      const goalDate = new Date(2028, 7, 1);
+
+      const retirementAllDays = daysBetween(today, retirementDate);
+      const goalAllDays = daysBetween(today, goalDate);
+
+      const retirementCalc = calculateActualWorkdays(today, retirementDate);
+      const goalCalc = calculateActualWorkdays(today, goalDate);
+
+      document.getElementById("todayText").textContent =
+        "Tänään: " + formatFinnishDate(today);
+
+      document.getElementById("allDaysRetirement").textContent = retirementAllDays.toLocaleString("fi-FI");
+      document.getElementById("weekdaysRetirement").textContent = retirementCalc.weekdays.toLocaleString("fi-FI");
+      document.getElementById("actualWorkdaysRetirement").textContent = retirementCalc.actual.toLocaleString("fi-FI");
+      document.getElementById("breakdownRetirement").textContent =
+        retirementCalc.weekdays + " − " + retirementCalc.weekdayHolidays + " − " + retirementCalc.vacationWorkdays + " = " + retirementCalc.actual;
+
+      document.getElementById("allDaysGoal").textContent = goalAllDays.toLocaleString("fi-FI");
+      document.getElementById("weekdaysGoal").textContent = goalCalc.weekdays.toLocaleString("fi-FI");
+      document.getElementById("actualWorkdaysGoal").textContent = goalCalc.actual.toLocaleString("fi-FI");
+      document.getElementById("breakdownGoal").textContent =
+        goalCalc.weekdays + " − " + goalCalc.weekdayHolidays + " − " + goalCalc.vacationWorkdays + " = " + goalCalc.actual;
+    }
+
+    async function readExif(file) {
+      try {
+        const data = await exifr.parse(file, {
+          gps: true,
+          tiff: true,
+          exif: true,
+          xmp: false,
+          icc: false,
+          iptc: false
+        });
+
+        const date = data?.DateTimeOriginal || data?.CreateDate || new Date(file.lastModified);
+
+        return {
+          cameraMake: data?.Make || null,
+          cameraModel: data?.Model || null,
+          iso: data?.ISO || null,
+          focalLength: data?.FocalLength || null,
+          date: date instanceof Date ? date : new Date(file.lastModified),
+          gps: typeof data?.latitude === "number" && typeof data?.longitude === "number"
+            ? {
+                latitude: Number(data.latitude.toFixed(6)),
+                longitude: Number(data.longitude.toFixed(6))
+              }
+            : null
+        };
+      } catch {
+        return {
+          cameraMake: null,
+          cameraModel: null,
+          iso: null,
+          focalLength: null,
+          date: new Date(file.lastModified),
+          gps: null
+        };
+      }
+    }
+
+    async function loadLatestDailyShot() {
+      const wrap = document.getElementById("dailyImageWrap");
+      const meta = document.getElementById("dailyMeta");
+      const status = document.getElementById("dailyStatus");
+
+      wrap.innerHTML = `<div class="dailyPlaceholder">Ladataan tämän päivän kuvaa…</div>`;
+      meta.textContent = "";
+      status.textContent = "";
+      status.className = "statusLine";
+
+      try {
+        const todayKey = getTodayKey();
+
+        const q = query(
+          collection(db, "miksang_sessions"),
+          where("mode", "==", "aamukampa"),
+          where("dateKey", "==", todayKey)
+        );
+
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          wrap.innerHTML = `
+            <div class="dailyPlaceholder">
+              Tälle päivälle ei vielä ole kuvaa.<br>
+              Lisää halutessasi tämän päivän kuva.
+            </div>
+          `;
+          meta.textContent = "";
+          return;
+        }
+
+        const docs = snap.docs.map(docSnap => {
+          const data = docSnap.data();
+          const createdAt = data?.createdAt?.toDate ? data.createdAt.toDate() : null;
+          return {
+            id: docSnap.id,
+            ...data,
+            _createdAtDate: createdAt
+          };
+        });
+
+        docs.sort((a, b) => {
+          const ta = a._createdAtDate ? a._createdAtDate.getTime() : 0;
+          const tb = b._createdAtDate ? b._createdAtDate.getTime() : 0;
+          return tb - ta;
+        });
+
+        const latest = docs[0];
+
+        wrap.innerHTML = `<img src="${latest.imageUrl}" alt="Päivän kuva">`;
+
+        const pieces = [];
+        pieces.push(`Tämän päivän viimeisin kuva`);
+
+        if (latest._createdAtDate) {
+          pieces.push(formatDateTime(latest._createdAtDate));
+        }
+
+        if (latest.exif?.cameraModel) {
+          pieces.push(latest.exif.cameraModel);
+        }
+
+        meta.textContent = pieces.join(" · ");
+      } catch (err) {
+        console.error(err);
+        wrap.innerHTML = `<div class="dailyPlaceholder">Päivän kuvan lataus epäonnistui.</div>`;
+        status.textContent = "Lataus epäonnistui.";
+        status.className = "statusLine warn";
+      }
+    }
+
+    async function saveDailyShot(file) {
+      const status = document.getElementById("dailyStatus");
+      const wrap = document.getElementById("dailyImageWrap");
+      const meta = document.getElementById("dailyMeta");
+
+      status.textContent = "Tallennetaan kuvaa…";
+      status.className = "statusLine";
+      meta.textContent = "";
+      wrap.innerHTML = `<div class="dailyPlaceholder">Tallennetaan tämän päivän kuvaa…</div>`;
+
+      try {
+        const exif = await readExif(file);
+
+        const id = uid();
+        const ext = file.name && file.name.includes(".")
+          ? file.name.split(".").pop().toLowerCase()
+          : "jpg";
+
+        const safeExt = ext && ext.length < 8 ? ext : "jpg";
+        const storagePath = `miksang/aamukampa-${id}/image.${safeExt}`;
+        const storageRef = ref(storage, storagePath);
+
+        await uploadBytes(storageRef, file, {
+          contentType: file.type || "image/jpeg"
+        });
+
+        const imageUrl = await getDownloadURL(storageRef);
+
+        await addDoc(collection(db, "miksang_sessions"), {
+          createdAt: serverTimestamp(),
+          imageUrl,
+          mode: "aamukampa",
+          dateKey: getTodayKey(),
+          exif: {
+            dateISO: exif?.date ? exif.date.toISOString() : null,
+            cameraMake: exif?.cameraMake || null,
+            cameraModel: exif?.cameraModel || null,
+            gps: exif?.gps || null,
+            iso: exif?.iso || null,
+            focalLength: exif?.focalLength || null
+          }
+        });
+
+        status.textContent = "Kuva tallennettu.";
+        status.className = "statusLine ok";
+
+        await loadLatestDailyShot();
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Tallennus epäonnistui.";
+        status.className = "statusLine warn";
+        wrap.innerHTML = `<div class="dailyPlaceholder">Tallennus epäonnistui.</div>`;
+      }
+    }
+
+    function bindDailyShotInput() {
+      const input = document.getElementById("dailyShotInput");
+      if (!input) return;
+
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        await saveDailyShot(file);
+        input.value = "";
+      });
+    }
+
+    function init() {
+      updateCounters();
+      updateLifeCounters();
+      showDailySelections();
+      bindDailyShotInput();
+      loadLatestDailyShot();
+    }
+
+    init();
+  </script>
+</body>
+</html>
