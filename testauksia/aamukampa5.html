@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arin aamukampa</title>
+  <style>
+    :root {
+      --bg1: #f7f4ef;
+      --bg2: #ebe2d4;
+      --card: rgba(255,255,255,0.88);
+      --card-solid: #ffffff;
+      --text: #2e2a26;
+      --muted: #6e685f;
+      --accent: #8a6d4b;
+      --accent-soft: #e9dfd2;
+      --border: #ddd3c7;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--card);
+      backdrop-filter: blur(7px);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 24px;
+      box-shadow: 0 12px 36px var(--shadow);
+    }
+
+    .today {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      font-size: 0.92rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .sub {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 900px;
+    }
+
+    .mindRow {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .quoteBox,
+    .zenBox,
+    .lifeBox {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--border);
+    }
+
+    .quoteBox {
+      text-align: center;
+    }
+
+    .boxTitle {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .quote {
+      font-size: 1.08rem;
+      line-height: 1.55;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .sideStack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .zenWord {
+      font-size: clamp(1.7rem, 4vw, 2.4rem);
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .zenSub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .lifeGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .miniCard {
+      background: var(--card-solid);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .miniLabel {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
+    .miniValue {
+      font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.05em;
+    }
+
+    .sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255,255,255,0.66);
+    }
+
+    .section h2 {
+      margin: 0 0 4px;
+      font-size: 1.2rem;
+    }
+
+    .section-date {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card-solid);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .label {
+      font-size: 0.96rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .value {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: var(--accent);
+    }
+
+    .small {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .footer {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .formula {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px dashed var(--border);
+      background: #faf7f2;
+    }
+
+    @media (max-width: 980px) {
+      .mindRow,
+      .sections {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .lifeGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .panel {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .section {
+        padding: 15px;
+      }
+
+      .quote {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="today" id="todayText">Tänään:</div>
+
+      <h1>Arin aamukampa</h1>
+      <p class="sub">
+        Päiviä kohti eläkeaikaa ja tavoite-eläkettä. Mukana myös arvio
+        <strong>todellisista työssäolopäivistä</strong>:
+        arkipäivät − arkipyhät − 50 vapaajakson arkipäivää.
+      </p>
+
+      <div class="mindRow">
+        <div class="quoteBox">
+          <div class="boxTitle">Päivän viisaus</div>
+          <div class="quote" id="quote">–</div>
+        </div>
+
+        <div class="sideStack">
+          <div class="zenBox">
+            <div class="boxTitle">Päivän sana</div>
+            <div class="zenWord" id="zenWord">–</div>
+            <div class="zenSub">Pieni suunta tälle päivälle.</div>
+          </div>
+
+          <div class="lifeBox">
+            <div class="boxTitle">Eksistentiaalinen näkymä</div>
+            <div class="lifeGrid">
+              <div class="miniCard">
+                <div class="miniLabel">Olet elänyt</div>
+                <div class="miniValue" id="daysLived">–</div>
+              </div>
+              <div class="miniCard">
+                <div class="miniLabel">Elämäsi päivä numero</div>
+                <div class="miniValue" id="lifeDayNumber">–</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sections">
+        <section class="section">
+          <h2>Eläkkeelle mahdollinen jäänti</h2>
+          <p class="section-date">1.4.2027</p>
+
+          <div class="grid">
+            <div class="card">
+              <div class="label">Kaikki päivät</div>
+              <div class="value" id="allDaysRetirement">–</div>
+              <div class="small">Kalenteripäivät tästä päivästä kohdepäivään</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Arkipäivät</div>
+              <div class="value" id="weekdaysRetirement">–</div>
+              <div class="small">Vain maanantai–perjantai</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Todelliset työssäolopäivät</div>
+              <div class="value" id="actualWorkdaysRetirement">–</div>
+              <div class="small">
+                Arkipäivät − arkipyhät − 50 vapaajakson arkipäivää
+                <br>
+                <span id="breakdownRetirement">–</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Tavoite-eläke</h2>
+          <p class="section-date">1.8.2028</p>
+
+          <div class="grid">
+            <div class="card">
+              <div class="label">Kaikki päivät</div>
+              <div class="value" id="allDaysGoal">–</div>
+              <div class="small">Kalenteripäivät tästä päivästä kohdepäivään</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Arkipäivät</div>
+              <div class="value" id="weekdaysGoal">–</div>
+              <div class="small">Vain maanantai–perjantai</div>
+            </div>
+
+            <div class="card">
+              <div class="label">Todelliset työssäolopäivät</div>
+              <div class="value" id="actualWorkdaysGoal">–</div>
+              <div class="small">
+                Arkipäivät − arkipyhät − 50 vapaajakson arkipäivää
+                <br>
+                <span id="breakdownGoal">–</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="footer">
+        <div><strong>Huom:</strong> arkipyhissä huomioidaan suomalaiset viralliset pyhäpäivät, jotka osuvat arkipäiville laskenta-ajalla.</div>
+        <div>Juhannusaatto ja jouluaatto eivät ole tässä mukana arkipyhinä.</div>
+        <div class="formula">
+          Todelliset työssäolopäivät = arkipäivät − arkipyhät − 50
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const VACATION_WORKDAYS = 50;
+    const birthDate = new Date(1962, 2, 25); // 25.3.1962
+
+    const quotes = [
+      "Oivalla syvästi: tämä hetki on kaikki, mitä sinulla koskaan on.",
+      "Nykyhetki on ainoa aika, johon voit vaikuttaa.",
+      "Elämä on nyt.",
+      "Missä oletkin, ole siellä kokonaan.",
+      "Et ole ajatuksesi.",
+      "Onnettomuuden syy ei ole tilanne, vaan ajatuksesi siitä.",
+      "Hyväksy — ja toimi.",
+      "Tietoinen läsnäolo on suurin muutoksen voima.",
+      "Tämäkin kuuluu tähän hetkeen.",
+      "Hyväksy tämä hetki kuin olisit itse valinnut sen.",
+      "Mikään ei koskaan tapahtunut menneisyydessä — kaikki tapahtui tässä hetkessä.",
+      "Mikään ei tapahdu tulevaisuudessa — kaikki tapahtuu tässä hetkessä.",
+      "Hiljaisuudessa syntyvät oivallukset.",
+      "Kun samaistut mieleesi, jäät aikaan vangiksi.",
+      "Kun menetät yhteyden sisäiseen hiljaisuuteen, menetät yhteyden itseesi.",
+      "Rauha löytyy tästä hetkestä, ei sen ulkopuolelta.",
+      "Älä etsi itseäsi ajattelusta — löydät itsesi läsnäolosta.",
+      "Tämä hetki riittää.",
+      "Mieli vie pois, läsnäolo tuo takaisin.",
+      "Ole tietoinen siitä, mitä on — ilman vastustusta.",
+      "Hengitys tuo sinut takaisin tähän.",
+      "Kun hyväksyt tämän hetken, vastustus päättyy.",
+      "Tässä hetkessä ei ole ongelmaa — vain tilanne.",
+      "Anna tämän hetken olla sellainen kuin se on.",
+      "Läsnäolo alkaa, kun lakkaat pakenemasta tätä hetkeä.",
+      "Hiljaisuus ei ole tyhjyyttä — se on läsnäoloa.",
+      "Ajatus ei ole sinä.",
+      "Tarkkaile mieltäsi — älä usko kaikkea mitä se sanoo.",
+      "Kun olet läsnä, aika menettää otteensa.",
+      "Todellinen voima on tässä hetkessä.",
+      "Anna ajatusten tulla ja mennä — sinä olet se, joka huomaa ne.",
+      "Et tarvitse tulevaisuutta ollaksesi kokonainen.",
+      "Ole tässä, juuri nyt — siinä on kaikki.",
+      "Kaikki, mitä koet, tapahtuu nyt.",
+      "Lepää tässä hetkessä.",
+      "Älä kiirehdi pois tästä hetkestä.",
+      "Tämä hetki on portti rauhaan.",
+      "Läsnäolo on yksinkertaista — mieli tekee siitä vaikeaa.",
+      "Kun lakkaat taistelemasta tätä hetkeä vastaan, rauha ilmestyy.",
+      "Ole se, joka huomaa — ei se, joka reagoi.",
+      "Sinun ei tarvitse lisätä tähän hetkeen mitään.",
+      "Tämä hetki on jo riittävä.",
+      "Huomaa, että olet tietoinen — siinä on kaikki.",
+      "Ole tässä ennen kuin ajattelet.",
+      "Kaikki alkaa tästä hetkestä."
+    ];
+
+    const zenWords = [
+      "hengitys",
+      "rauha",
+      "hiljaisuus",
+      "valo",
+      "nyt",
+      "virtaus",
+      "tila",
+      "läsnäolo",
+      "lempeys",
+      "selkeys",
+      "levollisuus",
+      "havahtuminen",
+      "kuuntelu",
+      "yksinkertaisuus",
+      "kiitollisuus",
+      "avautuminen",
+      "tasapaino",
+      "katse",
+      "odottamattomuus",
+      "hyväksyntä"
+    ];
+
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function isWeekday(date) {
+      const day = date.getDay(); // 0=su, 6=la
+      return day >= 1 && day <= 5;
+    }
+
+    function daysBetween(fromDate, toDate) {
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const from = startOfDay(fromDate);
+      const to = startOfDay(toDate);
+      return Math.max(0, Math.round((to - from) / msPerDay));
+    }
+
+    function countWeekdays(fromDate, toDate) {
+      const start = startOfDay(fromDate);
+      const end = startOfDay(toDate);
+      const current = new Date(start);
+      let count = 0;
+
+      while (current < end) {
+        if (isWeekday(current)) count++;
+        current.setDate(current.getDate() + 1);
+      }
+
+      return count;
+    }
+
+    function formatFinnishDate(date) {
+      return date.toLocaleDateString("fi-FI", {
+        weekday: "long",
+        day: "numeric",
+        month: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function createDate(year, month, day) {
+      return new Date(year, month - 1, day);
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function getEasterSunday(year) {
+      const a = year % 19;
+      const b = Math.floor(year / 100);
+      const c = year % 100;
+      const d = Math.floor(b / 4);
+      const e = b % 4;
+      const f = Math.floor((b + 8) / 25);
+      const g = Math.floor((b - f + 1) / 3);
+      const h = (19 * a + b - d - g + 15) % 30;
+      const i = Math.floor(c / 4);
+      const k = c % 4;
+      const l = (32 + 2 * e + 2 * i - h - k) % 7;
+      const m = Math.floor((a + 11 * h + 22 * l) / 451);
+      const month = Math.floor((h + l - 7 * m + 114) / 31);
+      const day = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(year, month - 1, day);
+    }
+
+    function getMidsummerDay(year) {
+      for (let day = 20; day <= 26; day++) {
+        const d = createDate(year, 6, day);
+        if (d.getDay() === 6) return d;
+      }
+      return null;
+    }
+
+    function getAllSaintsDay(year) {
+      for (let offset = 0; offset <= 6; offset++) {
+        const d = new Date(year, 9, 31 + offset);
+        if (d.getDay() === 6) return d;
+      }
+      return null;
+    }
+
+    function getFinnishPublicHolidays(year) {
+      const easterSunday = getEasterSunday(year);
+
+      return [
+        createDate(year, 1, 1),
+        createDate(year, 1, 6),
+        addDays(easterSunday, -2),
+        easterSunday,
+        addDays(easterSunday, 1),
+        createDate(year, 5, 1),
+        addDays(easterSunday, 39),
+        addDays(easterSunday, 49),
+        getMidsummerDay(year),
+        getAllSaintsDay(year),
+        createDate(year, 12, 6),
+        createDate(year, 12, 25),
+        createDate(year, 12, 26)
+      ].filter(Boolean);
+    }
+
+    function countWeekdayHolidaysInRange(fromDate, toDate) {
+      const start = startOfDay(fromDate);
+      const end = startOfDay(toDate);
+      let count = 0;
+
+      for (let year = start.getFullYear(); year <= end.getFullYear(); year++) {
+        const holidays = getFinnishPublicHolidays(year);
+
+        for (const holiday of holidays) {
+          const h = startOfDay(holiday);
+          if (h >= start && h < end && isWeekday(h)) {
+            count++;
+          }
+        }
+      }
+
+      return count;
+    }
+
+    function calculateActualWorkdays(fromDate, toDate) {
+      const weekdays = countWeekdays(fromDate, toDate);
+      const weekdayHolidays = countWeekdayHolidaysInRange(fromDate, toDate);
+      const actual = Math.max(0, weekdays - weekdayHolidays - VACATION_WORKDAYS);
+
+      return {
+        weekdays,
+        weekdayHolidays,
+        vacationWorkdays: VACATION_WORKDAYS,
+        actual
+      };
+    }
+
+    function getDaySeed(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}${m}${d}`;
+    }
+
+    function seededIndex(seedString, arrayLength, salt = 0) {
+      let hash = 0;
+      const str = seedString + ":" + salt;
+
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+      }
+
+      return hash % arrayLength;
+    }
+
+    function showDailySelections() {
+      const today = new Date();
+      const seed = getDaySeed(today);
+
+      const quoteIndex = seededIndex(seed, quotes.length, 11);
+      const zenIndex = seededIndex(seed, zenWords.length, 29);
+
+      document.getElementById("quote").textContent = quotes[quoteIndex];
+      document.getElementById("zenWord").textContent = zenWords[zenIndex];
+    }
+
+    function updateLifeCounters() {
+      const today = startOfDay(new Date());
+      const born = startOfDay(birthDate);
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const livedDays = Math.floor((today - born) / msPerDay);
+      const lifeDayNumber = livedDays + 1;
+
+      document.getElementById("daysLived").textContent = livedDays.toLocaleString("fi-FI");
+      document.getElementById("lifeDayNumber").textContent = lifeDayNumber.toLocaleString("fi-FI");
+    }
+
+    function updateCounters() {
+      const today = new Date();
+
+      const retirementDate = new Date(2027, 3, 1); // 1.4.2027
+      const goalDate = new Date(2028, 7, 1);       // 1.8.2028
+
+      const retirementAllDays = daysBetween(today, retirementDate);
+      const goalAllDays = daysBetween(today, goalDate);
+
+      const retirementCalc = calculateActualWorkdays(today, retirementDate);
+      const goalCalc = calculateActualWorkdays(today, goalDate);
+
+      document.getElementById("todayText").textContent =
+        "Tänään: " + formatFinnishDate(today);
+
+      document.getElementById("allDaysRetirement").textContent = retirementAllDays.toLocaleString("fi-FI");
+      document.getElementById("weekdaysRetirement").textContent = retirementCalc.weekdays.toLocaleString("fi-FI");
+      document.getElementById("actualWorkdaysRetirement").textContent = retirementCalc.actual.toLocaleString("fi-FI");
+      document.getElementById("breakdownRetirement").textContent =
+        `${retirementCalc.weekdays} − ${retirementCalc.weekdayHolidays} − ${retirementCalc.vacationWorkdays} = ${retirementCalc.actual}`;
+
+      document.getElementById("allDaysGoal").textContent = goalAllDays.toLocaleString("fi-FI");
+      document.getElementById("weekdaysGoal").textContent = goalCalc.weekdays.toLocaleString("fi-FI");
+      document.getElementById("actualWorkdaysGoal").textContent = goalCalc.actual.toLocaleString("fi-FI");
+      document.getElementById("breakdownGoal").textContent =
+        `${goalCalc.weekdays} − ${goalCalc.weekdayHolidays} − ${goalCalc.vacationWorkdays} = ${goalCalc.actual}`;
+    }
+
+    updateCounters();
+    updateLifeCounters();
+    showDailySelections();
+  </script>
+</body>
+</html>
