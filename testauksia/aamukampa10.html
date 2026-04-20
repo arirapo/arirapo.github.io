@@ -17,6 +17,8 @@
       --border: #ddd3c7;
       --shadow: rgba(0, 0, 0, 0.08);
       --line: rgba(47,42,36,.12);
+      --ok: #49684f;
+      --warn: #9a5c3c;
     }
 
     * {
@@ -80,7 +82,8 @@
 
     .dailyBox,
     .zenBox,
-    .lifeBox {
+    .lifeBox,
+    .adminBox {
       padding: 18px 20px;
       border-radius: 18px;
       background: rgba(255,255,255,0.72);
@@ -141,14 +144,16 @@
       line-height: 1.5;
     }
 
-    .dailyActions {
+    .dailyActions,
+    .adminActions {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
     }
 
-    .buttonLike {
+    .buttonLike,
+    .adminButton {
       appearance: none;
       display: inline-flex;
       align-items: center;
@@ -165,7 +170,15 @@
       transition: transform .12s ease, opacity .12s ease;
     }
 
-    .buttonLike:hover {
+    .adminButton.soft {
+      background: rgba(255,255,255,.58);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .buttonLike:hover,
+    .adminButton:hover {
       transform: translateY(-1px);
       opacity: 0.94;
     }
@@ -183,11 +196,11 @@
     }
 
     .statusLine.ok {
-      color: #49684f;
+      color: var(--ok);
     }
 
     .statusLine.warn {
-      color: #9a5c3c;
+      color: var(--warn);
     }
 
     .dailyQuoteBox {
@@ -341,6 +354,24 @@
       background: #faf7f2;
     }
 
+    .adminFields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .adminInput {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.52);
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+    }
+
     @media (max-width: 980px) {
       .mindRow,
       .sections {
@@ -381,6 +412,23 @@
         <strong>todellisista työssäolopäivistä</strong>:
         arkipäivät − arkipyhät − 50 vapaajakson arkipäivää per mukana oleva kalenterivuosi.
       </p>
+
+      <div class="adminBox" style="margin-bottom:18px;">
+        <div class="boxTitle">Admin</div>
+        <div class="small" id="adminAuthStatus">Not signed in.</div>
+
+        <div class="adminFields">
+          <input id="adminEmail" class="adminInput" type="email" autocomplete="username" placeholder="Admin email" />
+          <input id="adminPassword" class="adminInput" type="password" autocomplete="current-password" placeholder="Admin password" />
+        </div>
+
+        <div class="adminActions" style="margin-top:12px;">
+          <button id="adminSignInBtn" class="adminButton soft" type="button">Sign in</button>
+          <button id="adminSignOutBtn" class="adminButton soft" type="button">Sign out</button>
+        </div>
+
+        <div class="small">Päivän kuvan lukeminen toimii ilman kirjautumista. Uuden kuvan tallennus vaatii admin-kirjautumisen.</div>
+      </div>
 
       <div class="mindRow">
         <div class="dailyBox">
@@ -546,6 +594,13 @@
       uploadBytes,
       getDownloadURL
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signOut,
+      getIdTokenResult
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD-FTHW5Mg8o7_JNXNalKIw_sdxtC-A-G0",
@@ -560,13 +615,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
+    const auth = getAuth(app);
 
     const VACATION_WORKDAYS_PER_YEAR = 50;
-    const birthDate = new Date(1962, 2, 25); // 25.3.1962
+    const birthDate = new Date(1962, 2, 25);
 
-    const vocationalStartDate = new Date(2004, 7, 1);    // 1.8.2004
-    const entrepreneurStartDate = new Date(1999, 1, 15); // 15.2.1999
-    const photographyStartDate = new Date(1977, 7, 1);   // 1.8.1977
+    const vocationalStartDate = new Date(2004, 7, 1);
+    const entrepreneurStartDate = new Date(1999, 1, 15);
+    const photographyStartDate = new Date(1977, 7, 1);
 
     const quotes = [
       "Oivalla syvästi: tämä hetki on kaikki, mitä sinulla koskaan on.",
@@ -617,26 +673,10 @@
     ];
 
     const zenWords = [
-      "hengitys",
-      "rauha",
-      "hiljaisuus",
-      "valo",
-      "nyt",
-      "virtaus",
-      "tila",
-      "läsnäolo",
-      "lempeys",
-      "selkeys",
-      "levollisuus",
-      "havahtuminen",
-      "kuuntelu",
-      "yksinkertaisuus",
-      "kiitollisuus",
-      "avautuminen",
-      "tasapaino",
-      "katse",
-      "odottamattomuus",
-      "hyväksyntä"
+      "hengitys", "rauha", "hiljaisuus", "valo", "nyt", "virtaus", "tila",
+      "läsnäolo", "lempeys", "selkeys", "levollisuus", "havahtuminen",
+      "kuuntelu", "yksinkertaisuus", "kiitollisuus", "avautuminen",
+      "tasapaino", "katse", "odottamattomuus", "hyväksyntä"
     ];
 
     function uid() {
@@ -754,7 +794,6 @@
 
     function getFinnishPublicHolidays(year) {
       const easterSunday = getEasterSunday(year);
-
       return [
         createDate(year, 1, 1),
         createDate(year, 1, 6),
@@ -779,12 +818,9 @@
 
       for (let year = start.getFullYear(); year <= end.getFullYear(); year++) {
         const holidays = getFinnishPublicHolidays(year);
-
         for (const holiday of holidays) {
           const h = startOfDay(holiday);
-          if (h >= start && h < end && isWeekday(h)) {
-            count++;
-          }
+          if (h >= start && h < end && isWeekday(h)) count++;
         }
       }
 
@@ -802,12 +838,7 @@
       const vacationWorkdays = yearsTouched * VACATION_WORKDAYS_PER_YEAR;
       const actual = Math.max(0, weekdays - weekdayHolidays - vacationWorkdays);
 
-      return {
-        weekdays,
-        weekdayHolidays,
-        vacationWorkdays,
-        actual
-      };
+      return { weekdays, weekdayHolidays, vacationWorkdays, actual };
     }
 
     function getDaySeed(date) {
@@ -820,11 +851,9 @@
     function seededIndex(seedString, arrayLength, salt = 0) {
       let hash = 0;
       const str = seedString + ":" + salt;
-
       for (let i = 0; i < str.length; i++) {
         hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
       }
-
       return hash % arrayLength;
     }
 
@@ -843,9 +872,7 @@
       const start = startOfDay(startDate);
       const end = startOfDay(endDate);
 
-      if (end < start) {
-        return { years: 0, months: 0, days: 0 };
-      }
+      if (end < start) return { years: 0, months: 0, days: 0 };
 
       let years = end.getFullYear() - start.getFullYear();
       let months = end.getMonth() - start.getMonth();
@@ -882,25 +909,18 @@
       document.getElementById("daysLived").textContent = livedDays.toLocaleString("fi-FI");
       document.getElementById("lifeDayNumber").textContent = lifeDayNumber.toLocaleString("fi-FI");
 
-      document.getElementById("vocationalDays").textContent =
-        daysSince(vocationalStartDate, today).toLocaleString("fi-FI");
-      document.getElementById("vocationalDuration").textContent =
-        formatDurationYMD(vocationalStartDate, today);
+      document.getElementById("vocationalDays").textContent = daysSince(vocationalStartDate, today).toLocaleString("fi-FI");
+      document.getElementById("vocationalDuration").textContent = formatDurationYMD(vocationalStartDate, today);
 
-      document.getElementById("entrepreneurDays").textContent =
-        daysSince(entrepreneurStartDate, today).toLocaleString("fi-FI");
-      document.getElementById("entrepreneurDuration").textContent =
-        formatDurationYMD(entrepreneurStartDate, today);
+      document.getElementById("entrepreneurDays").textContent = daysSince(entrepreneurStartDate, today).toLocaleString("fi-FI");
+      document.getElementById("entrepreneurDuration").textContent = formatDurationYMD(entrepreneurStartDate, today);
 
-      document.getElementById("photographyDays").textContent =
-        daysSince(photographyStartDate, today).toLocaleString("fi-FI");
-      document.getElementById("photographyDuration").textContent =
-        formatDurationYMD(photographyStartDate, today);
+      document.getElementById("photographyDays").textContent = daysSince(photographyStartDate, today).toLocaleString("fi-FI");
+      document.getElementById("photographyDuration").textContent = formatDurationYMD(photographyStartDate, today);
     }
 
     function updateCounters() {
       const today = new Date();
-
       const retirementDate = new Date(2027, 3, 1);
       const goalDate = new Date(2028, 7, 1);
 
@@ -910,8 +930,7 @@
       const retirementCalc = calculateActualWorkdays(today, retirementDate);
       const goalCalc = calculateActualWorkdays(today, goalDate);
 
-      document.getElementById("todayText").textContent =
-        "Tänään: " + formatFinnishDate(today);
+      document.getElementById("todayText").textContent = "Tänään: " + formatFinnishDate(today);
 
       document.getElementById("allDaysRetirement").textContent = retirementAllDays.toLocaleString("fi-FI");
       document.getElementById("weekdaysRetirement").textContent = retirementCalc.weekdays.toLocaleString("fi-FI");
@@ -924,6 +943,64 @@
       document.getElementById("actualWorkdaysGoal").textContent = goalCalc.actual.toLocaleString("fi-FI");
       document.getElementById("breakdownGoal").textContent =
         goalCalc.weekdays + " − " + goalCalc.weekdayHolidays + " − " + goalCalc.vacationWorkdays + " = " + goalCalc.actual;
+    }
+
+    function escHtml(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    async function getAdminStatus(forceRefresh = false) {
+      const user = auth.currentUser;
+      if (!user) {
+        return { signedIn: false, isAdmin: false, email: null, uid: null };
+      }
+
+      const tokenResult = await getIdTokenResult(user, forceRefresh);
+      return {
+        signedIn: true,
+        isAdmin: tokenResult?.claims?.admin === true,
+        email: user.email || null,
+        uid: user.uid
+      };
+    }
+
+    function updateAdminUi(status) {
+      const line = document.getElementById("adminAuthStatus");
+      const signInBtn = document.getElementById("adminSignInBtn");
+      const signOutBtn = document.getElementById("adminSignOutBtn");
+
+      if (!line || !signInBtn || !signOutBtn) return;
+
+      if (!status?.signedIn) {
+        line.textContent = "Not signed in.";
+        signInBtn.disabled = false;
+        signOutBtn.disabled = true;
+        return;
+      }
+
+      if (status.isAdmin) {
+        line.textContent = `Signed in as admin: ${status.email || status.uid}`;
+      } else {
+        line.textContent = `Signed in, but not admin: ${status.email || status.uid}`;
+      }
+
+      signInBtn.disabled = false;
+      signOutBtn.disabled = false;
+    }
+
+    async function requireAdmin() {
+      const status = await getAdminStatus(true);
+      if (!status.signedIn) {
+        throw new Error("Please sign in as admin first.");
+      }
+      if (!status.isAdmin) {
+        throw new Error("This signed-in account does not have admin rights.");
+      }
+      return status;
     }
 
     async function readExif(file) {
@@ -1017,15 +1094,10 @@
         wrap.innerHTML = `<img src="${latest.imageUrl}" alt="Päivän kuva">`;
 
         const pieces = [];
-        pieces.push(`Tämän päivän viimeisin kuva`);
+        pieces.push("Tämän päivän viimeisin kuva");
 
-        if (latest._createdAtDate) {
-          pieces.push(formatDateTime(latest._createdAtDate));
-        }
-
-        if (latest.exif?.cameraModel) {
-          pieces.push(latest.exif.cameraModel);
-        }
+        if (latest._createdAtDate) pieces.push(formatDateTime(latest._createdAtDate));
+        if (latest.exif?.cameraModel) pieces.push(latest.exif.cameraModel);
 
         meta.textContent = pieces.join(" · ");
       } catch (err) {
@@ -1041,12 +1113,14 @@
       const wrap = document.getElementById("dailyImageWrap");
       const meta = document.getElementById("dailyMeta");
 
-      status.textContent = "Tallennetaan kuvaa…";
+      status.textContent = "Valmistellaan tallennusta…";
       status.className = "statusLine";
       meta.textContent = "";
       wrap.innerHTML = `<div class="dailyPlaceholder">Tallennetaan tämän päivän kuvaa…</div>`;
 
       try {
+        await requireAdmin();
+
         const exif = await readExif(file);
 
         const id = uid();
@@ -1085,7 +1159,7 @@
         await loadLatestDailyShot();
       } catch (err) {
         console.error(err);
-        status.textContent = "Tallennus epäonnistui.";
+        status.textContent = err?.message || "Tallennus epäonnistui.";
         status.className = "statusLine warn";
         wrap.innerHTML = `<div class="dailyPlaceholder">Tallennus epäonnistui.</div>`;
       }
@@ -1103,12 +1177,107 @@
       });
     }
 
+    function bindAdmin() {
+      const signInBtn = document.getElementById("adminSignInBtn");
+      const signOutBtn = document.getElementById("adminSignOutBtn");
+
+      if (signInBtn) {
+        signInBtn.addEventListener("click", async () => {
+          const emailInput = document.getElementById("adminEmail");
+          const passwordInput = document.getElementById("adminPassword");
+          const dailyStatus = document.getElementById("dailyStatus");
+
+          const email = emailInput?.value.trim() || "";
+          const password = passwordInput?.value || "";
+
+          if (!email) {
+            dailyStatus.textContent = "Enter admin email.";
+            dailyStatus.className = "statusLine warn";
+            return;
+          }
+
+          if (!password) {
+            dailyStatus.textContent = "Enter admin password.";
+            dailyStatus.className = "statusLine warn";
+            return;
+          }
+
+          signInBtn.disabled = true;
+          dailyStatus.textContent = "Signing in...";
+          dailyStatus.className = "statusLine";
+
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            const status = await getAdminStatus(true);
+            updateAdminUi(status);
+
+            if (!status.isAdmin) {
+              dailyStatus.textContent = "Signed in, but this account is not admin.";
+              dailyStatus.className = "statusLine warn";
+              return;
+            }
+
+            if (passwordInput) passwordInput.value = "";
+            dailyStatus.textContent = "Admin sign-in successful.";
+            dailyStatus.className = "statusLine ok";
+          } catch (err) {
+            console.error(err);
+            dailyStatus.textContent = err?.message || "Sign-in failed.";
+            dailyStatus.className = "statusLine warn";
+          } finally {
+            signInBtn.disabled = false;
+          }
+        });
+      }
+
+      if (signOutBtn) {
+        signOutBtn.addEventListener("click", async () => {
+          const passwordInput = document.getElementById("adminPassword");
+          const dailyStatus = document.getElementById("dailyStatus");
+
+          signOutBtn.disabled = true;
+          dailyStatus.textContent = "Signing out...";
+          dailyStatus.className = "statusLine";
+
+          try {
+            await signOut(auth);
+            if (passwordInput) passwordInput.value = "";
+            updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+            dailyStatus.textContent = "Signed out.";
+            dailyStatus.className = "statusLine ok";
+          } catch (err) {
+            console.error(err);
+            dailyStatus.textContent = err?.message || "Sign-out failed.";
+            dailyStatus.className = "statusLine warn";
+          } finally {
+            signOutBtn.disabled = false;
+          }
+        });
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
+        return;
+      }
+
+      try {
+        const status = await getAdminStatus(false);
+        updateAdminUi(status);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
     function init() {
       updateCounters();
       updateLifeCounters();
       showDailySelections();
       bindDailyShotInput();
+      bindAdmin();
       loadLatestDailyShot();
+      updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
     }
 
     init();
