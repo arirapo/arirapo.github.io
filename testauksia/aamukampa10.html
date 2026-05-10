@@ -21,9 +21,7 @@
       --warn: #9a5c3c;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -34,10 +32,7 @@
       padding: 20px;
     }
 
-    .wrap {
-      max-width: 1120px;
-      margin: 0 auto;
-    }
+    .wrap { max-width: 1120px; margin: 0 auto; }
 
     .panel {
       background: var(--card);
@@ -195,13 +190,8 @@
       line-height: 1.45;
     }
 
-    .statusLine.ok {
-      color: var(--ok);
-    }
-
-    .statusLine.warn {
-      color: var(--warn);
-    }
+    .statusLine.ok { color: var(--ok); }
+    .statusLine.warn { color: var(--warn); }
 
     .dailyQuoteBox {
       margin-top: 6px;
@@ -374,15 +364,11 @@
 
     @media (max-width: 980px) {
       .mindRow,
-      .sections {
-        grid-template-columns: 1fr;
-      }
+      .sections { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 620px) {
-      .lifeGrid {
-        grid-template-columns: 1fr;
-      }
+      .lifeGrid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 520px) {
@@ -391,13 +377,9 @@
         border-radius: 20px;
       }
 
-      .section {
-        padding: 15px;
-      }
+      .section { padding: 15px; }
 
-      .dailyBox {
-        min-height: auto;
-      }
+      .dailyBox { min-height: auto; }
     }
   </style>
 </head>
@@ -417,14 +399,16 @@
         <div class="boxTitle">Admin</div>
         <div class="small" id="adminAuthStatus">Not signed in.</div>
 
+        <!-- Vanha email/password-login jätetty talteen, mutta poistettu käytöstä.
         <div class="adminFields">
           <input id="adminEmail" class="adminInput" type="email" autocomplete="username" placeholder="Admin email" />
           <input id="adminPassword" class="adminInput" type="password" autocomplete="current-password" placeholder="Admin password" />
         </div>
+        -->
 
         <div class="adminActions" style="margin-top:12px;">
-          <button id="adminSignInBtn" class="adminButton soft" type="button">Sign in</button>
-          <button id="adminSignOutBtn" class="adminButton soft" type="button">Sign out</button>
+          <button id="adminSignInBtn" class="adminButton soft" type="button">Login with Google</button>
+          <button id="adminSignOutBtn" class="adminButton soft" type="button">Logout</button>
         </div>
 
         <div class="small">Päivän kuvan lukeminen toimii ilman kirjautumista. Uuden kuvan tallennus vaatii admin-kirjautumisen.</div>
@@ -597,7 +581,8 @@
     import {
       getAuth,
       onAuthStateChanged,
-      signInWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
       signOut,
       getIdTokenResult
     } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
@@ -616,6 +601,7 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
     const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     const VACATION_WORKDAYS_PER_YEAR = 50;
     const birthDate = new Date(1962, 2, 25);
@@ -945,14 +931,6 @@
         goalCalc.weekdays + " − " + goalCalc.weekdayHolidays + " − " + goalCalc.vacationWorkdays + " = " + goalCalc.actual;
     }
 
-    function escHtml(str = "") {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
-    }
-
     async function getAdminStatus(forceRefresh = false) {
       const user = auth.currentUser;
       if (!user) {
@@ -1183,31 +1161,15 @@
 
       if (signInBtn) {
         signInBtn.addEventListener("click", async () => {
-          const emailInput = document.getElementById("adminEmail");
-          const passwordInput = document.getElementById("adminPassword");
           const dailyStatus = document.getElementById("dailyStatus");
 
-          const email = emailInput?.value.trim() || "";
-          const password = passwordInput?.value || "";
-
-          if (!email) {
-            dailyStatus.textContent = "Enter admin email.";
-            dailyStatus.className = "statusLine warn";
-            return;
-          }
-
-          if (!password) {
-            dailyStatus.textContent = "Enter admin password.";
-            dailyStatus.className = "statusLine warn";
-            return;
-          }
-
           signInBtn.disabled = true;
-          dailyStatus.textContent = "Signing in...";
+          dailyStatus.textContent = "Signing in with Google...";
           dailyStatus.className = "statusLine";
 
           try {
-            await signInWithEmailAndPassword(auth, email, password);
+            await signInWithPopup(auth, provider);
+
             const status = await getAdminStatus(true);
             updateAdminUi(status);
 
@@ -1217,7 +1179,6 @@
               return;
             }
 
-            if (passwordInput) passwordInput.value = "";
             dailyStatus.textContent = "Admin sign-in successful.";
             dailyStatus.className = "statusLine ok";
           } catch (err) {
@@ -1232,7 +1193,6 @@
 
       if (signOutBtn) {
         signOutBtn.addEventListener("click", async () => {
-          const passwordInput = document.getElementById("adminPassword");
           const dailyStatus = document.getElementById("dailyStatus");
 
           signOutBtn.disabled = true;
@@ -1241,7 +1201,6 @@
 
           try {
             await signOut(auth);
-            if (passwordInput) passwordInput.value = "";
             updateAdminUi({ signedIn: false, isAdmin: false, email: null, uid: null });
             dailyStatus.textContent = "Signed out.";
             dailyStatus.className = "statusLine ok";
